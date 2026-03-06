@@ -7,7 +7,7 @@ from models.issued_book import (
     get_dashboard_stats, get_pending_requests, approve_request, reject_request
 )
 from models.fine import get_all_fines, mark_fine_paid, calculate_and_update_fines
-from models.message import get_user_chats, get_conversation, send_message, mark_messages_read, get_admin_id
+from models.message import get_user_chats, get_conversation, send_message, mark_messages_read, get_admin_id, get_all_users_for_chat
 from models.notification import create_notification
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -242,21 +242,29 @@ def pay_fine_route(fine_id):
     return redirect(url_for('admin.fines'))
 
 
-# ─── Chat (Feature 3) ────────────────────────────
+# ─── Chat (Feature 3 – All Users) ────────────────
 @admin_bp.route('/chat')
 @admin_required
 def chat_list():
-    chats = get_user_chats(session['user_id'])
-    return render_template('admin/chat.html', chats=chats, active_chat=None, messages=[])
+    """Show admin chat list + option to start new ones."""
+    my_id = session['user_id']
+    chats = get_user_chats(my_id)
+    all_users = get_all_users_for_chat(my_id)
+    return render_template('admin/chat.html', chats=chats, all_users=all_users,
+                           active_chat=None, messages=[])
 
 
 @admin_bp.route('/chat/<int:user_id>')
 @admin_required
 def chat_with_user(user_id):
-    chats = get_user_chats(session['user_id'])
-    messages = get_conversation(session['user_id'], user_id)
-    mark_messages_read(user_id, session['user_id'])
-    return render_template('admin/chat.html', chats=chats, active_chat=user_id, messages=messages)
+    """Chat with a specific user from admin side."""
+    my_id = session['user_id']
+    chats = get_user_chats(my_id)
+    all_users = get_all_users_for_chat(my_id)
+    messages = get_conversation(my_id, user_id)
+    mark_messages_read(user_id, my_id)
+    return render_template('admin/chat.html', chats=chats, all_users=all_users,
+                           active_chat=user_id, messages=messages)
 
 
 @admin_bp.route('/chat/<int:user_id>/send', methods=['POST'])

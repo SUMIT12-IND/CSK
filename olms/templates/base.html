@@ -75,9 +75,8 @@
                 class="nav-link {% if request.endpoint == 'user.notifications' %}active{% endif %}">
                 <span class="nav-icon">🔔</span> Notifications
             </a>
-            <a href="{{ url_for('user.chat') }}"
-                class="nav-link {% if request.endpoint == 'user.chat' %}active{% endif %}">
-                <span class="nav-icon">💬</span> Chat with Admin
+            <a href="{{ url_for('user.chat') }}" class="nav-link {% if 'chat' in request.endpoint %}active{% endif %}">
+                <span class="nav-icon">💬</span> Chat
             </a>
             {% endif %}
         </nav>
