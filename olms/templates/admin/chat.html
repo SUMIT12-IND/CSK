@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Chat{% endblock %}
+{% block page_title %}User Messages{% endblock %}
+{% block content %}
+<div class="admin-chat-layout">
+    <div class="chat-user-list">
+        <h3>Conversations</h3>
+        {% if chats %}
+        {% for user in chats %}
+        <a href="{{ url_for('admin.chat_with_user', user_id=user.id) }}"
+            class="chat-user-item {% if active_chat == user.id %}active{% endif %}">
+            <span class="chat-user-avatar">{{ user.name[0] }}</span>
+            <div class="chat-user-info">
+                <span class="chat-user-name">{{ user.name }}</span>
+                <small>{{ user.email }}</small>
+            </div>
+            {% if user.unread > 0 %}
+            <span class="chat-unread-badge">{{ user.unread }}</span>
+            {% endif %}
+        </a>
+        {% endfor %}
+        {% else %}
+        <p class="chat-empty">No conversations yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="chat-container">
+        {% if active_chat %}
+        <div class="chat-messages" id="chatMessages">
+            {% for m in messages %}
+            <div class="chat-bubble {% if m.sender_id == session.get('user_id') %}sent{% else %}received{% endif %}">
+                <div class="bubble-sender">{{ m.sender_name }}</div>
+                <div class="bubble-content">{{ m.message }}</div>
+                <div class="bubble-time">{{ m.created_at.strftime('%I:%M %p') }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <form class="chat-input-bar" method="POST" action="{{ url_for('admin.send_chat', user_id=active_chat) }}">
+            <input type="text" name="message" placeholder="Type a reply..." autocomplete="off" required>
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+        <script>
+            const chatBox = document.getElementById('chatMessages');
+            if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+        </script>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-icon">💬</span>
+            <p>Select a conversation to start chatting.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
